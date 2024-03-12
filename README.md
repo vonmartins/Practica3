@@ -24,7 +24,7 @@ El objetivo de este proyecto es crear un servidor web en un dispositivo ESP32 ut
 #include <WebServer.h>
 
 const char* ssid = "MOVISTAR_D220"; 
-const char* password = "cHowxiTG2otK8kNaoRQF"; 
+const char* password = "*********"; 
 
 WebServer server;
 
