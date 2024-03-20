@@ -14,7 +14,7 @@ El objetivo de este proyecto es crear un servidor web en un dispositivo ESP32 ut
 5. Se ingresó la dirección IP del ESP32 en la barra de direcciones del navegador.
 
 ## Código utilizado
-### `main2.cpp`
+### `main.cpp`
 
 ```cpp
 #include <Arduino.h>

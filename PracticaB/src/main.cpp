@@ -36,7 +36,7 @@ void setup() {
   pCharacteristic->addDescriptor(new BLE2902());
 
   // Set security to none
-  pCharacteristic->setSecurity(BLE_SECURITY_NO_ACCESS);
+  // pCharacteristic->setSecurity(BLE_SECURITY_NO_ACCESS);
 
   pService->start();
   BLEAdvertising* pAdvertising = pServer->getAdvertising();
