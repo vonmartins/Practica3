@@ -173,8 +173,74 @@ Servidor HTTP iniciado
 # Práctica 3B - Comunicación bluetooth con el movil
 
 ## Objetivo
+El objetivo de esta práctica es establecer una comunicación BLE (Bluetooth Low Energy) entre una ESP32S3 y un dispositivo móvil. La ESP32S3 actuará como un servidor BLE que permitirá la lectura, escritura y notificación de datos. Sin embargo, en esta implementación, se encontró un problema en el que el dispositivo se conectaba pero se desconectaba poco tiempo después.
 
-## Procedimiento
+
+## Código fuente
+
+```cpp
+#include <Arduino.h>
+#include <BLEDevice.h>
+#include <BLEServer.h>
+#include <BLEUtils.h>
+#include <BLE2902.h>
+
+BLEServer* pServer;
+BLECharacteristic* pCharacteristic;
+bool deviceConnected = false;
+
+class MyServerCallbacks : public BLEServerCallbacks {
+    void onConnect(BLEServer* pServer) {
+      deviceConnected = true;
+    }
+
+    void onDisconnect(BLEServer* pServer) {
+      deviceConnected = false;
+    }
+};
+
+void setup() {
+  Serial.begin(115200);
+
+  BLEDevice::init("ESP32S3");
+  pServer = BLEDevice::createServer();
+  pServer->setCallbacks(new MyServerCallbacks());
+  BLEService* pService = pServer->createService(BLEUUID("4fafc201-1fb5-459e-8fcc-c5c9c331914b"));
+  pCharacteristic = pService->createCharacteristic(
+                      BLEUUID("beb5483e-36e1-4688-b7f5-ea07361b26a8"),
+                      BLECharacteristic::PROPERTY_READ |
+                      BLECharacteristic::PROPERTY_WRITE |
+                      BLECharacteristic::PROPERTY_NOTIFY |
+                      BLECharacteristic::PROPERTY_INDICATE
+                    );
+
+  pCharacteristic->addDescriptor(new BLE2902());
+
+  // Set security to none
+  // pCharacteristic->setSecurity(BLE_SECURITY_NO_ACCESS);
+
+  pService->start();
+  BLEAdvertising* pAdvertising = pServer->getAdvertising();
+  pAdvertising->start();
+  Serial.println("Bluetooth device active, waiting for connections...");
+}
+
+void loop() {
+  if (deviceConnected) {
+    if (Serial.available()) {
+      pCharacteristic->setValue((uint8_t*)Serial.read(), 1);
+      pCharacteristic->notify();
+    }
+  }
+}
+```
+
+### Explicación del código
+
+1. Definición de Callbacks para el Servidor BLE: Se define una clase para manejar los eventos de conexión y desconexión del servidor BLE
+2. Configuración Inicial en `setup()`: Se inicializa el dispositivo BLE, se crea un servidor y se configura un servicio y una característica BLE. La característica tiene propiedades de lectura, escritura, notificación e indicación. Luego, se inicia la publicidad BLE para que otros dispositivos puedan descubrir el servidor
+3. Bucle Principal `loop()`: En el loop(), se verifica si hay un dispositivo conectado. Si es así y hay datos disponibles en el puerto serie, se leen y se envían como una notificación a través de la característica BLE.
 
 ## Resultados y salida del terminal
+La conexión BLE se establece pero se desconecta poco tiempo después.
 
